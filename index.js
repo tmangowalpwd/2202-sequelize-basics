@@ -126,6 +126,54 @@ app.get("/users/:id", async (req, res) => {
   }
 })
 
+app.post("/users/register", async (req, res) => {
+  try {
+    const { email, username, password, passwordConfirm } = req.body
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password needs more than 8 characters",
+      })
+    }
+
+    if (password !== passwordConfirm) {
+      return res.status(400).json({
+        message: "Password does not match",
+      })
+    }
+
+    const findUserByUsernameOrEmail = await db.User.findOne({
+      where: {
+        [Op.or]: {
+          username: username,
+          email: email,
+        },
+      },
+    })
+
+    if (findUserByUsernameOrEmail) {
+      return res.status(400).json({
+        message: "Username or email has been taken",
+      })
+    }
+
+    await db.User.create({
+      username,
+      email,
+      password,
+    })
+
+    return res.status(201).json({
+      message: "User registered",
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: "Server error",
+    })
+  }
+})
+
 app.listen(PORT, () => {
   db.sequelize.sync({ alter: true })
   console.log("Listening in port", PORT)

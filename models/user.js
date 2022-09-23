@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       },
       email: DataTypes.STRING,
       password: DataTypes.STRING,
+      login_attempts: {
+        defaultValue: 0,
+        type: DataTypes.INTEGER,
+      },
+      is_suspended: {
+        defaultValue: false,
+        type: DataTypes.BOOLEAN
+      }
     },
     {
       sequelize,
@@ -28,3 +36,4 @@ module.exports = (sequelize, DataTypes) => {
   )
   return User
 }
+
