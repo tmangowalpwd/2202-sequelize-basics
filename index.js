@@ -43,7 +43,9 @@ app.get("/users", async (req, res) => {
 
 app.post("/users", async (req, res) => {
   try {
-    const createUser = await db.User.create({ ...req.body })
+    const createUser = await db.User.create({
+      ...req.body,
+    })
 
     return res.status(201).json({
       message: "Created user",
@@ -174,7 +176,12 @@ app.post("/users/register", async (req, res) => {
   }
 })
 
+const expensesRoute = require("./routes/expensesRoute")
+
+app.use("/expenses", expensesRoute)
+
 app.listen(PORT, () => {
   db.sequelize.sync({ alter: true })
   console.log("Listening in port", PORT)
 })
+
