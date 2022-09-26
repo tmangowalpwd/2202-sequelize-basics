@@ -14,6 +14,6 @@ router.post("/login", expensesController.loginUser)
 
 // 2. Dapetin list expenses dari user yang sedang login
 //    Jangan pake body, query, dan route params
-router.get("/me")
+router.get("/me", expensesController.getMyExpenses)
 
 module.exports = router

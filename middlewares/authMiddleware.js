@@ -2,7 +2,6 @@ const { validateToken } = require("../lib/jwt");
 
 const verifyToken = (req, res, next) => {
   let token = req.headers.authorization;
-  console.log(token)
 
   if (!token) {
     return res.status(401).json({

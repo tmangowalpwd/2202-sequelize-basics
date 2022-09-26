@@ -4,14 +4,14 @@ const db = require("../models")
 module.exports = {
   createExpense: async (req, res) => {
     try {
-      const { amount, categoryId, userId } = req.body
+      const { amount, categoryId } = req.body
 
       const today = new Date()
 
       await db.Expense.create({
         amount,
         CategoryId: categoryId,
-        UserId: userId,
+        UserId: req.user.id,
         day: today.getDate(),
         month: today.getMonth() + 1,
         year: today.getFullYear(),
@@ -167,5 +167,24 @@ module.exports = {
       })
     }
   },
+  getMyExpenses: async (req, res) => {
+    try {
+      const findExpensesByUserId = await db.Expense.findAll({
+        where: {
+          userId: req.user.id
+        }
+      })
+
+      return res.status(200).json({
+        message: "Get my expenses",
+        data: findExpensesByUserId
+      })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({
+        message: "Server error"
+      })
+    }
+  }
 }
 
