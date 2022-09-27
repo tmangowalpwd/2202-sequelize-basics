@@ -1,13 +1,14 @@
 const express = require("express")
 const dotenv = require("dotenv")
 const db = require("./models")
+const cors = require("cors")
 
 dotenv.config()
 
 const PORT = 2000
 
 const app = express()
-
+app.use(cors())
 app.use(express.json())
 
 const expensesRoute = require("./routes/expensesRoute")
