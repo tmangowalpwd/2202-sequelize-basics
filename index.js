@@ -2,6 +2,7 @@ const express = require("express")
 const dotenv = require("dotenv")
 const db = require("./models")
 const cors = require("cors")
+const fs = require("fs")
 
 dotenv.config()
 
@@ -21,8 +22,15 @@ app.use("/expenses", verifyToken, expensesRoute)
 app.use("/auth", authRoute)
 app.use("/posts", postsRoute)
 
+app.use("/public", express.static("public"))
+
 app.listen(PORT, () => {
   db.sequelize.sync({ alter: true })
+
+  if (!fs.existsSync("public")) {
+    fs.mkdirSync("public")
+  }
+
   console.log("Listening in port", PORT)
 })
 

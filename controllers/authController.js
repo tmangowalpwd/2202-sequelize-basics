@@ -2,15 +2,22 @@ const { Op } = require("sequelize")
 const db = require("../models")
 const bcrypt = require("bcrypt")
 const { signToken } = require("../lib/jwt")
+const { validationResult } = require("express-validator")
 
 const User = db.User
 
 const authController = {
   registerUser: async (req, res) => {
-    // 1. Check username and email, harus unik
-    // 2. Daftarkan
-
     try {
+      const errors = validationResult(req)
+
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+          message: "Invalid fields"
+        })
+      }
+
       const { username, email, password } = req.body
 
       const findUserByUsernameOrEmail = await User.findOne({

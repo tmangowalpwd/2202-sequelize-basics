@@ -5,7 +5,9 @@ Post = db.Post
 const postsController = {
   createPost: async (req, res) => {
     try {
-      const { body, image_url } = req.body
+      const { body } = req.body
+
+      const image_url = `http://localhost:2000/public/${req.file.filename}`
 
       await Post.create({
         body,
