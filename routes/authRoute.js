@@ -2,6 +2,7 @@ const express = require("express")
 const authController = require("../controllers/authController")
 const { verifyToken } = require("../middlewares/authMiddleware")
 const { body } = require("express-validator")
+const { upload } = require("../lib/uploader")
 
 const router = express.Router()
 
@@ -25,6 +26,16 @@ router.post(
 )
 router.post("/login", authController.loginUser)
 router.get("/refresh-token", verifyToken, authController.refreshToken)
+
+router.patch(
+  "/me",
+  verifyToken,
+  upload({
+    acceptedFileTypes: ["png", "jpeg", "jpg"],
+    filePrefix: "PROF",
+  }).single("profile_picture"),
+  authController.editUserProfile
+)
 
 module.exports = router
 

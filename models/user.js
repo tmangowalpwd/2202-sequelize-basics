@@ -28,7 +28,8 @@ module.exports = (sequelize, DataTypes) => {
       is_suspended: {
         defaultValue: false,
         type: DataTypes.BOOLEAN
-      }
+      },
+      profile_picture_url: DataTypes.STRING
     },
     {
       sequelize,

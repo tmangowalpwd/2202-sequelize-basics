@@ -14,7 +14,7 @@ const authController = {
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array(),
-          message: "Invalid fields"
+          message: "Invalid fields",
         })
       }
 
@@ -116,6 +116,49 @@ const authController = {
         message: "Renewed user token",
         data: findUserById,
         token: renewedToken,
+      })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({
+        message: "Server error",
+      })
+    }
+  },
+  editUserProfile: async (req, res) => {
+    try {
+      if (req.file) {
+        req.body.profile_picture_url = `http://localhost:2000/public/${req.file.filename}`
+      }
+
+      const findUserByUsernameOrEmail = await User.findOne({
+        where: {
+          [Op.or]: {
+            username: req.body.username || "",
+            email: req.body.email || ""
+          }
+        }
+      })
+
+      if (findUserByUsernameOrEmail) {
+        return res.status(400).json({
+          message: "username or email has been taken"
+        })
+      }
+
+      await User.update(
+        { ...req.body },
+        {
+          where: {
+            id: req.user.id,
+          },
+        }
+      )
+
+      const findUserById = await User.findByPk(req.user.id)
+
+      return res.status(200).json({
+        message: "Edited user data",
+        data: findUserById,
       })
     } catch (err) {
       console.log(err)
