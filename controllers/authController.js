@@ -4,6 +4,10 @@ const bcrypt = require("bcrypt")
 const { signToken } = require("../lib/jwt")
 const { validationResult } = require("express-validator")
 
+const fs = require("fs")
+const handlebars = require("handlebars")
+const emailer = require("../lib/emailer")
+
 const User = db.User
 
 const authController = {
@@ -41,6 +45,20 @@ const authController = {
         username,
         email,
         password: hashedPassword,
+      })
+
+      // Kirim email "verifikasi"
+      const rawHTML = fs.readFileSync("templates/register_user.html", "utf-8")
+      const compiledHTML = handlebars.compile(rawHTML)
+      const htmlResult = compiledHTML({
+        username
+      })
+
+      await emailer({
+        to: email,
+        html: htmlResult,
+        subject: "Verify your account",
+        text: "Please verify your account"
       })
 
       return res.status(201).json({
