@@ -7,6 +7,10 @@ const { validationResult } = require("express-validator")
 const fs = require("fs")
 const handlebars = require("handlebars")
 const emailer = require("../lib/emailer")
+const {
+  validateVerificationToken,
+  createVerificationToken,
+} = require("../lib/verification")
 
 const User = db.User
 
@@ -47,18 +51,25 @@ const authController = {
         password: hashedPassword,
       })
 
+      const verificationToken = createVerificationToken({
+        id: newUser.id,
+      })
+      const verificationLink =
+        `http://localhost:2000/auth/verification?verification_token=${verificationToken}`
+
       // Kirim email "verifikasi"
       const rawHTML = fs.readFileSync("templates/register_user.html", "utf-8")
       const compiledHTML = handlebars.compile(rawHTML)
       const htmlResult = compiledHTML({
-        username
+        username,
+        verificationLink
       })
 
       await emailer({
         to: email,
         html: htmlResult,
         subject: "Verify your account",
-        text: "Please verify your account"
+        text: "Please verify your account",
       })
 
       return res.status(201).json({
@@ -152,14 +163,14 @@ const authController = {
         where: {
           [Op.or]: {
             username: req.body.username || "",
-            email: req.body.email || ""
-          }
-        }
+            email: req.body.email || "",
+          },
+        },
       })
 
       if (findUserByUsernameOrEmail) {
         return res.status(400).json({
-          message: "username or email has been taken"
+          message: "username or email has been taken",
         })
       }
 
@@ -178,6 +189,35 @@ const authController = {
         message: "Edited user data",
         data: findUserById,
       })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({
+        message: "Server error",
+      })
+    }
+  },
+  verifyUser: async (req, res) => {
+    try {
+      const { verification_token } = req.query
+
+      const validToken = validateVerificationToken(verification_token)
+
+      if (!validToken) {
+        return res.status(401).json({
+          message: "Token invalid",
+        })
+      }
+
+      await User.update(
+        { is_verified: true },
+        {
+          where: {
+            id: validToken.id,
+          },
+        }
+      )
+
+      return res.redirect("http://localhost:3000/login")
     } catch (err) {
       console.log(err)
       return res.status(500).json({

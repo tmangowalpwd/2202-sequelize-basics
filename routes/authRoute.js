@@ -37,5 +37,7 @@ router.patch(
   authController.editUserProfile
 )
 
+router.get("/verification", authController.verifyUser)
+
 module.exports = router
 
