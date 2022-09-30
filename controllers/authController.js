@@ -225,6 +225,41 @@ const authController = {
       })
     }
   },
+  resendVerification: async (req, res) => {
+    try {
+      const findUserById = await User.findByPk(req.user.id)
+
+      const verificationToken = createVerificationToken({
+        id: findUserById.id,
+      })
+      const verificationLink =
+        `http://localhost:2000/auth/verification?verification_token=${verificationToken}`
+
+      // Kirim email "verifikasi"
+      const rawHTML = fs.readFileSync("templates/register_user.html", "utf-8")
+      const compiledHTML = handlebars.compile(rawHTML)
+      const htmlResult = compiledHTML({
+        username: findUserById.username,
+        verificationLink
+      })
+
+      await emailer({
+        to: findUserById.email,
+        html: htmlResult,
+        subject: "Verify your account",
+        text: "Please verify your account",
+      })
+
+      return res.status(200).json({
+        message: "Verification email sent"
+      })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({
+        message: "Server error"
+      })
+    }
+  }
 }
 
 module.exports = authController

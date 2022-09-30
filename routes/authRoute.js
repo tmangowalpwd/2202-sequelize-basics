@@ -39,5 +39,9 @@ router.patch(
 
 router.get("/verification", authController.verifyUser)
 
+// Buat sebuah endpoint/route bernama POST /verification
+// Isi endpointnya -> Untuk resend verification email
+router.post("/verification", verifyToken, authController.resendVerification)
+
 module.exports = router
 
