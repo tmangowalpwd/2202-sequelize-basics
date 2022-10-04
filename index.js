@@ -21,7 +21,7 @@ app.post("/email", async (req, res) => {
   const compiledHTML = handlebars.compile(rawHTML)
   // Isi variable2 yang ada di HTML
   const result = compiledHTML({
-    username: "seto"
+    username: "seto",
   })
 
   await emailer({
@@ -37,12 +37,16 @@ app.post("/email", async (req, res) => {
 const expensesRoute = require("./routes/expensesRoute")
 const authRoute = require("./routes/authRoute")
 const postsRoute = require("./routes/postsRoute")
+const transactionsRoute = require("./routes/transactionsRoute")
 
 const { verifyToken } = require("./middlewares/authMiddleware")
 
 app.use("/expenses", verifyToken, expensesRoute)
 app.use("/auth", authRoute)
 app.use("/posts", postsRoute)
+
+// Buat route /transaction
+app.use("/transactions", verifyToken, transactionsRoute)
 
 app.use("/public", express.static("public"))
 
