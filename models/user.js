@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       User.hasMany(models.Expense)
       User.hasMany(models.Post)
+      User.hasMany(models.Transaction)
     }
   }
   User.init(
@@ -33,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
       is_verified: {
         defaultValue: false,
         type: DataTypes.BOOLEAN
+      },
+      is_admin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       }
     },
     {
