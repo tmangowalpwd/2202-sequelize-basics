@@ -1,6 +1,10 @@
 const express = require("express")
 const { upload } = require("../lib/uploader")
 const db = require("../models")
+const fs = require("fs")
+const handlebars = require("handlebars")
+const moment = require("moment")
+const emailer = require("../lib/emailer")
 
 const router = express.Router()
 
@@ -87,6 +91,49 @@ router.patch("/status/:id", async (req, res) => {
     if (!findUser.is_admin) {
       return res.status(401).json({
         message: "User unauthorized"
+      })
+    }
+
+    if (status === "accepted") {
+      const invoiceDate = moment().format("DD MMMM YYYY")
+
+      const findTransactionById = await Transaction.findByPk(id, {
+        include: [
+          { model: User }
+        ]
+      })
+
+      const findTransactionItems = await TransactionItem.findAll({
+        where: {
+          TransactionId: id
+        },
+        include: [
+          { model: Ticket }
+        ]
+      })
+
+      const transactionItems = findTransactionItems.map((item) => {
+        return {
+          event_name: item.Ticket.event_name,
+          quantity: item.quantity,
+          total_price: item.total_price.toLocaleString()
+        }
+      })
+
+      // Kirim email "verifikasi"
+      const rawHTML = fs.readFileSync("templates/invoice.html", "utf-8")
+      const compiledHTML = handlebars.compile(rawHTML)
+      const resultHTML = compiledHTML({
+        invoiceDate,
+        grandTotal: findTransactionById.total_price.toLocaleString(),
+        transactionItems
+      })
+
+      await emailer({
+        to: findTransactionById.User.email,
+        html: resultHTML,
+        subject: "Ticketing Invoice",
+        text: "Your invoice"
       })
     }
 

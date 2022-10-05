@@ -23,7 +23,7 @@
         <h3>Invoice</h3>
       </td>
       <td style="text-align: right">
-        <h3>5 October 2022</h3>
+        <h3>{{ invoiceDate }}</h3>
       </td>
     </tr>
   </table>
@@ -37,21 +37,13 @@
       </tr>
     </thead>
     <tbody>
+      {{#each transactionItems}}
       <tr>
-        <td>We The Fest</td>
-        <td>2</td>
-        <td>Rp. 1,000,000</td>
+        <td>{{ this.event_name }}</td>
+        <td>{{ this.quantity }}</td>
+        <td>Rp. {{ this.total_price }}</td>
       </tr>
-      <tr>
-        <td>We The Fest</td>
-        <td>2</td>
-        <td>Rp. 1,000,000</td>
-      </tr>
-      <tr>
-        <td>We The Fest</td>
-        <td>2</td>
-        <td>Rp. 1,000,000</td>
-      </tr>
+      {{/each}}
     </tbody>
   </table>
   <hr />
@@ -61,7 +53,7 @@
         <h2>Total</h2>
       </td>
       <td style="text-align: right;">
-        <h2>Rp. 3,000,000</h2>
+        <h2>Rp. {{ grandTotal }}</h2>
       </td>
     </tr>
   </table>
