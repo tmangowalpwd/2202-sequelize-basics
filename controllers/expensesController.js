@@ -1,21 +1,20 @@
 const { Op } = require("sequelize")
 const db = require("../models")
+const ExpensesService = require("../services/expensesService")
 
 module.exports = {
   createExpense: async (req, res) => {
     try {
       const { amount, categoryId } = req.body
 
-      const today = new Date()
-
-      await db.Expense.create({
+      const service = new ExpensesService()
+      const serviceResult = await service.createExpense({
         amount,
-        CategoryId: categoryId,
-        UserId: req.user.id,
-        day: today.getDate(),
-        month: today.getMonth() + 1,
-        year: today.getFullYear(),
+        categoryId,
+        userId: req.user.id,
       })
+
+      if (!serviceResult.success) throw serviceResult.err
 
       return res.status(201).json({
         message: "Created expense",
@@ -111,13 +110,13 @@ module.exports = {
 
       if (!findUserByUsernameOrEmail) {
         return res.status(400).json({
-          message: "Username or email not found"
+          message: "Username or email not found",
         })
       }
 
       if (findUserByUsernameOrEmail.is_suspended) {
         return res.status(400).json({
-          message: "Failed to login, your account is suspended"
+          message: "Failed to login, your account is suspended",
         })
       }
 
@@ -130,21 +129,18 @@ module.exports = {
           findUserByUsernameOrEmail.save()
 
           return res.status(400).json({
-            message: "Wrong password, your account has been suspended"
+            message: "Wrong password, your account has been suspended",
           })
         }
 
-        await db.User.increment(
-          "login_attempts",
-          {
-            where: {
-              [Op.or]: {
-                username: usernameOrEmail,
-                email: usernameOrEmail,
-              },
+        await db.User.increment("login_attempts", {
+          where: {
+            [Op.or]: {
+              username: usernameOrEmail,
+              email: usernameOrEmail,
             },
-          }
-        )
+          },
+        })
 
         return res.status(400).json({
           message: "Wrong password",
@@ -158,7 +154,7 @@ module.exports = {
 
       return res.status(200).json({
         message: "Login successful",
-        data: findUserByUsernameOrEmail
+        data: findUserByUsernameOrEmail,
       })
     } catch (err) {
       console.log(err)
@@ -171,20 +167,20 @@ module.exports = {
     try {
       const findExpensesByUserId = await db.Expense.findAll({
         where: {
-          userId: req.user.id
-        }
+          userId: req.user.id,
+        },
       })
 
       return res.status(200).json({
         message: "Get my expenses",
-        data: findExpensesByUserId
+        data: findExpensesByUserId,
       })
     } catch (err) {
       console.log(err)
       return res.status(500).json({
-        message: "Server error"
+        message: "Server error",
       })
     }
-  }
+  },
 }
 

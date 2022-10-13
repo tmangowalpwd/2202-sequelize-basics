@@ -67,7 +67,7 @@ app.listen(PORT, async () => {
     fs.mkdirSync("public")
   }
 
-  await redisClient.connect()
+  // await redisClient.connect()
 
   console.log("Listening in port", PORT)
 })
